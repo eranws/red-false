@@ -10,7 +10,15 @@ cut: function[a][   ; this is an action that receives an object and returns it m
     head a ; reset, return head
 ]
 
-recipe-string: "cut banana"
+chop: function[a][
+    h: (length? a) * 2    
+    while [(index? a) < h][a: next a insert a space a: next a]
+    insert a space ; cut!
+    head a ; reset, return head
+]
+
+recipe-string: "chop banana"
+; recipe-string: "cut banana"
 recipe: load recipe-string
 
 rule: [action object description]
