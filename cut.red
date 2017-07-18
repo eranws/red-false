@@ -1,6 +1,8 @@
 Red []
 
 banana: "banana" ; string example, can be image or a real banana
+                    ; or a function that returns a banana (if remains)
+                    ; throws if out of stock 
 
 cut: function[a][   ; this is an action that receives an object and returns it modified
                     ; if input is image it can be cut into two.
@@ -31,6 +33,18 @@ if(parse recipe rule)[
     print out
 ]
 
+; as parse expressions, denser and works directly on input
+; but not transferrable to other domains
+
+cut-parse: [x: (n: (length? x) / 2) n skip insert space thru end]
+b: copy "banana"
+parse b cut-parse
+print b
+
+chop-parse: [any [x: skip (insert x space) skip]]
+b: copy "banana"
+parse b chop-parse
+print b
 
 
 ; test: 1
