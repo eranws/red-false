@@ -12,13 +12,19 @@ number: [copy n [some digit] (print n insert s load n)]
 ; *: :multiply
 
 ; symbol: [copy op ["+" | "*"] (print get-word op insert s add take s take s)]
-symbol: [ "+" (insert s add pop pop)
-        | "-" (insert s subtract pop pop) 
-        | "*" (insert s multiply pop pop) 
-        | "/" (insert s divide pop pop) 
-        | "_" (insert s negate pop) ]
+; "+" "-" "*" "/" "_"
+op: [ "+" (insert s add pop pop)
+    | "-" (insert s subtract pop pop) 
+    | "*" (insert s multiply pop pop) 
+    | "/" (insert s divide pop pop) 
+    | "_" (insert s negate pop) ]
 
-false-lang: [any [[number | space | symbol] (print-stack)] ]
+; "="	">"
+bool: [ "=" (insert s equal? pop pop)
+      | ">" (insert s greater? pop pop) ]
+    
+
+false-lang: [any [[space | number | op | bool] (print-stack)] ]
 
 fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
 print parse fac false-lang
@@ -42,3 +48,11 @@ print s/1
 s: []
 print parse "3 6 / " false-lang
 print s/1 = 2
+
+
+; test: function[f /local s][print parse f false-lang print s]
+test: function[f v][clear s print equal? v parse f false-lang]
+
+test "1 1 =" true
+test "1 0 <" false
+
