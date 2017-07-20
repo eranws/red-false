@@ -35,9 +35,11 @@ bool: [ "=" (push tf equal? pop pop)
       | "&" (push tf (and~ pop pop)) 
       | "|" (push tf (or~ pop pop)) ]
 
+value: ["'" set val skip (push to-integer val)]
+
 ; variables: 
 
-false-lang: [any [[space | number | op | bool] (print-stack)] ]
+false-lang: [any [[space | number | op | bool | value] (print-stack)] ]
 
 fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
 print parse fac false-lang
@@ -106,3 +108,6 @@ test "1_ 1_ &" -1
 
 test "1_ ~" 0
 test "0  ~" -1
+
+test "'A" 65
+test "' " 32
