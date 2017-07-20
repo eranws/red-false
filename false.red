@@ -28,13 +28,13 @@ op: [ "+" (push add pop pop)
 ; "="	">"
 tf: function[v][either v [-1][0]]
 
-; tf: function[v][ if v[t: -1] if not v[t: 0] t]
-
 bool: [ "=" (push tf equal? pop pop)
       | ">" (push tf greater? pop pop)
-      | "~" (push negate pop) ]
+      | "~" (push complement pop)
+      | "&" (push and~ pop pop) ]
+      | "|" (push or~ pop pop) ]
 
-    
+; variables: 
 
 false-lang: [any [[space | number | op | bool] (print-stack)] ]
 
