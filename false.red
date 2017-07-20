@@ -43,7 +43,16 @@ variable: [ copy var lower [
             ";" (push get load var)
             ]]
 
-false-lang: [any [[space | number | op | bool | value | variable] (print-stack)] ]
+lambda: [ "[" copy f to "]" skip (push f)] ; push the expression as-is to the stack
+apply: [ "!" (f: pop parse f false-lang)]  ; execute from the head as if it was read from original string
+
+stack-functions: [ "$" (push pick s 1)      
+                 | "%" (pop)                 
+                 | "\" (swap s next s)       
+                 | "@" (swap s next s swap s next next s)
+                 | "ø" (push pick s 1 + pop) ]
+
+false-lang: [any [[space | number | op | bool | value | variable | lambda | apply | stack-functions] (print-stack)] ]
 
 fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
 print parse fac false-lang
@@ -85,6 +94,20 @@ test: function[f v][
     ; prin newline
     ]
 
+test-stack: function[f st][
+    clear s 
+    p: parse f false-lang 
+    result: equal? st s
+    print result
+
+    ; prin { f: "} prin f print {"}
+    ; prin { st: "} prin st print {"}
+    ; prin { s: "} prin s print {"}
+    ; prin { equal? "} prin result print {"}
+    ; prin newline
+    ]
+
+
 ; eq, greater
 test "1 1 =" -1
 test "1 0 >" -1
@@ -118,4 +141,17 @@ test "' " 32
 ; test "1a:"      ; { a:=1 }
 ; test "a;1+b:"   ; { b:=a+1 }
 test "1a:a;1+b:b;" 2
+test "2[1+]!" 3
+
+; [1+]i:
+; 2i;!
+
+test "[1+]i:2i;!" 3
+
+test-stack "1$" [1 1]
+test-stack "1 2%" [1]
+test-stack "1 2\" [1 2]
+test-stack "1 2 3" [3 2 1]
+test-stack "1 2 3@" [1 3 2]
+test-stack "7 8 9 2ø" [7 9 8 7]
 
