@@ -4,15 +4,15 @@ Red []
 s: stack: []
 
 print-stack: does []
+print-read: does []
 ; print-stack: does [prin "stack: " print s]
-dbg: function[a][]
-; dbg: function[a][print a]
+; print-read: function[a][prin {read: } a]
 
 pop: does [h: take s]
 push: function[a][insert s a]
 
 digit: charset "0123456789"
-number: [copy n [some digit] (dbg n insert s load n)]
+number: [copy n [some digit] (print-read n push load n)]
 
 ; +: :add ; creates hell on console
 ; *: :multiply
@@ -26,13 +26,14 @@ op: [ "+" (push add pop pop)
     | "_" (push negate pop) ]
 
 ; "="	">"
-tf: function[v][either v [-1][0]]
+tf: function[v][either ((v = true) or (v = -1)) [-1][0]]
 
+; bool: [ "=" (t: equal? pop pop push (tf t))
 bool: [ "=" (push tf equal? pop pop)
-      | ">" (push tf greater? pop pop)
-      | "~" (push complement pop)
-      | "&" (push and~ pop pop) ]
-      | "|" (push or~ pop pop) ]
+      | ">" (push tf (lesser? pop pop))
+      | "~" (push tf (complement pop))
+      | "&" (push tf (and~ pop pop)) 
+      | "|" (push tf (or~ pop pop)) ]
 
 ; variables: 
 
@@ -64,15 +65,29 @@ print s/1 = 2
 
 
 ; test: function[f /local s][print parse f false-lang print s]
-test: function[f v][clear s print equal? v parse f false-lang]
+
+test: function[f v][
+    clear s 
+    p: parse f false-lang 
+    result: equal? v s/1
+    print result
+
+    ; prin { f: "} prin f print {"}
+    ; prin { v: "} prin v print {"}
+    ; prin { s/1: "} prin s/1 print {"}
+    ; prin { equal? "} prin result print {"}
+    ; prin newline
+    ]
 
 ; eq, greater
-test "1 1 =" true
-test "1 0 >" false
+test "1 1 =" -1
+test "1 0 >" -1
 
-; not
-test "1 0 =~" true
-test "1 0 = ~" true
+; ; not
+test "1 0 =~" -1
+test "1 0 = ~" -1
 
-test "1 2 > ~" true
+test "1 2 >" 0
+test "1 2 > ~" -1
 
+test "1 1 =~" 0
