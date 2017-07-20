@@ -31,7 +31,9 @@ tf: function[v][either v [-1][0]]
 ; tf: function[v][ if v[t: -1] if not v[t: 0] t]
 
 bool: [ "=" (push tf equal? pop pop)
-      | ">" (push tf greater? pop pop) ]
+      | ">" (push tf greater? pop pop)
+      | "~" (push negate pop) ]
+
     
 
 false-lang: [any [[space | number | op | bool] (print-stack)] ]
@@ -64,6 +66,13 @@ print s/1 = 2
 ; test: function[f /local s][print parse f false-lang print s]
 test: function[f v][clear s print equal? v parse f false-lang]
 
+; eq, greater
 test "1 1 =" true
-test "1 0 <" false
+test "1 0 >" false
+
+; not
+test "1 0 =~" true
+test "1 0 = ~" true
+
+test "1 2 > ~" true
 
