@@ -37,9 +37,13 @@ bool: [ "=" (push tf equal? pop pop)
 
 value: ["'" set val skip (push to-integer val)]
 
-; variables: 
+lower: charset [#"a" - #"z"]
+variable: [ copy var lower [ 
+            ":" (set load var pop) | 
+            ";" (push get load var)
+            ]]
 
-false-lang: [any [[space | number | op | bool | value] (print-stack)] ]
+false-lang: [any [[space | number | op | bool | value | variable] (print-stack)] ]
 
 fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
 print parse fac false-lang
@@ -111,3 +115,7 @@ test "0  ~" -1
 
 test "'A" 65
 test "' " 32
+; test "1a:"      ; { a:=1 }
+; test "a;1+b:"   ; { b:=a+1 }
+test "1a:a;1+b:b;" 2
+
