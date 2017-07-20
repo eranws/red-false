@@ -26,8 +26,12 @@ op: [ "+" (push add pop pop)
     | "_" (push negate pop) ]
 
 ; "="	">"
-bool: [ "=" (push equal? pop pop)
-      | ">" (push greater? pop pop) ]
+tf: function[v][either v [-1][0]]
+
+; tf: function[v][ if v[t: -1] if not v[t: 0] t]
+
+bool: [ "=" (push tf equal? pop pop)
+      | ">" (push tf greater? pop pop) ]
     
 
 false-lang: [any [[space | number | op | bool] (print-stack)] ]
@@ -62,3 +66,4 @@ test: function[f v][clear s print equal? v parse f false-lang]
 
 test "1 1 =" true
 test "1 0 <" false
+
