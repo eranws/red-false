@@ -52,10 +52,17 @@ stack-functions: [ "$" (push pick s 1)
                  | "@" (swap s next s swap s next next s)
                  | "ø" (push pick s 1 + pop) ]
 
-false-lang: [any [[space | number | op | bool | value | variable | lambda | apply | stack-functions] (print-stack)] ]
+if?: [ "?" (f: pop if (pop = tf true) [parse f false-lang])]
 
-fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
-print parse fac false-lang
+
+false-lang: [any [
+                [space | number | op | bool | value | variable | 
+                lambda | apply | stack-functions | if?] 
+            (print-stack)] ]
+
+; XXX throws error since if? added
+; fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
+; print parse fac false-lang
 
 ex1: "1 2 + 4 *"
 print parse ex1 false-lang
@@ -155,3 +162,11 @@ test-stack "1 2 3" [3 2 1]
 test-stack "1 2 3@" [1 3 2]
 test-stack "7 8 9 2ø" [7 9 8 7]
 
+test "1_[3]?" 3
+test "0[3]?" none
+test "0~[3]?" 3
+test "1_~[3]?" none
+test "1 1=$[]?~[4]?" none
+
+; a;1=["hello!"]?		{ if a=1 then print "hello!" }
+; no strings yet!
