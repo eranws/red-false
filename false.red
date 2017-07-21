@@ -3,16 +3,22 @@ Red []
 
 s: stack: []
 
-print-stack: does []
-print-read: does []
-; print-stack: does [prin "stack: " print s]
-; print-read: function[a][prin {read: } a]
+debug-print: does []
+debug-prin: does []
+
+; debug-print: :print
+; debug-prin: :prin
+
+; print-stack: does [debug-print]
+; print-read: does []
+print-stack: does [debug-prin " stack: " debug-print s]
+print-read: function[a][debug-prin " read: " debug-print a]
 
 pop: does [h: take s]
 push: function[a][insert s a]
 
 digit: charset "0123456789"
-number: [copy n [some digit] (print-read n push load n)]
+number: [copy n [some digit] (push load n)]
 
 ; +: :add ; creates hell on console
 ; *: :multiply
@@ -39,8 +45,8 @@ value: ["'" set val skip (push to-integer val)]
 
 lower: charset [#"a" - #"z"]
 variable: [ copy var lower [ 
-            ":" (set load var pop) | 
-            ";" (push get load var)
+            ":" (set load var pop) (debug-prin " set: " debug-print var)| 
+            ";" (push get load var) (debug-prin " get: " debug-print var)
             ]]
 
 lambda: [ "[" copy f to "]" skip (push f)] ; push the expression as-is to the stack
@@ -56,15 +62,20 @@ if?: [ "?" (f: pop if (pop = tf true) [parse f false-lang])]
 
 while?: ["#" (
         body: pop
-        (parse pop false-lang)
         cond: pop 
-        while [cond = tf true] [parse body false-lang])]
+        debug-print body
+        debug-print cond
+        while [
+            (parse cond false-lang) ; run function
+            p: pop
+            debug-print p
+            p = (tf true)] [parse body false-lang])]
 
-
-false-lang: [any [
+false-lang: [any [ copy sym
                 [space | number | op | bool | value | variable | 
                 lambda | apply | stack-functions | if? | while? ] 
-            (print-stack)] ]
+                (print-read sym)
+                (print-stack)] ]
 
 ; XXX throws error since if? added
 ; fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
@@ -190,4 +201,12 @@ test "1 1=$[]?~[4]?" none
 
 ; a;1=["hello!"]?		{ if a=1 then print "hello!" }
 ; no strings yet!
+
+; test "[1_][]#" error? ;infinite-loop
+; [a;1=][2f;!]#		{ while a=1 do f(2) } ; will never stop
 test "[0][]#" none
+test "0b:5a:[0a;=~][1a;-a:b;1+b:]#b;" 5
+test "15a:[a;0>][6a;-a:]#a;" -3; f: function[a: a - 6] { while a > 0 do f() }
+
+; --- questions:
+; why false? why forth? what is this stack (runtime? or compiler. can run interpreted?)
