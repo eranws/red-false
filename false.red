@@ -54,10 +54,16 @@ stack-functions: [ "$" (push pick s 1)
 
 if?: [ "?" (f: pop if (pop = tf true) [parse f false-lang])]
 
+while?: ["#" (
+        body: pop
+        (parse pop false-lang)
+        cond: pop 
+        while [cond = tf true] [parse body false-lang])]
+
 
 false-lang: [any [
                 [space | number | op | bool | value | variable | 
-                lambda | apply | stack-functions | if?] 
+                lambda | apply | stack-functions | if? | while? ] 
             (print-stack)] ]
 
 ; XXX throws error since if? added
@@ -184,3 +190,4 @@ test "1 1=$[]?~[4]?" none
 
 ; a;1=["hello!"]?		{ if a=1 then print "hello!" }
 ; no strings yet!
+test "[0][]#" none
