@@ -114,6 +114,20 @@ test-stack: function[f st][
     ; prin newline
     ]
 
+test-print: function[f st][
+    clear s 
+    p: parse f false-lang 
+    result: equal? st s/1
+    print result
+
+    prin { parse: "} prin p print {"}
+    prin { f: "} prin f print {"}
+    prin { st: "} prin st print {"}
+    prin { s: "} prin s print {"}
+    prin { equal? "} prin result print {"}
+    prin newline
+    ]
+
 
 ; eq, greater
 test "1 1 =" -1
