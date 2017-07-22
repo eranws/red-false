@@ -49,8 +49,6 @@ variable: [ copy var lower [
             ";" (push get load var) (debug-prin " get: " debug-print var)
             ]]
 
-; expr: [any [to "[" to "]"] to "]"]
-
 expr: [(dep: 1) 
     any [
         ahead "]" (dep: dep - 1) 
@@ -90,7 +88,7 @@ false-lang: [any [
                 (print-stack)] ]
 
 ; XXX throws error since if? added
-; fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
+fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
 ; print parse fac false-lang
 
 ex1: "1 2 + 4 *"
@@ -230,6 +228,7 @@ test "0b:5a:[0a;=~][1a;-a:b;1+b:]#b;" 5
 test "15a:[a;0>][6a;-a:]#a;" -3; f: function[a: a - 6] { while a > 0 do f() }
 
 test "0b:5a:[0a;=~][1a;-a:b;1+b:]#b;" 5
+test-stack "5a:[0a;=~][1a;-a:8]#" [8 8 8 8 8]
 test "111 3a:[0a:]x:x;!a;" 0
 
 test "[[123]]x:x;" "[123]"
@@ -240,9 +239,9 @@ test "[1]" "1"
 test "[][]" ""
 test "[[]]" "[]"
 
-; test-print "123 3a:[0a:]x:[0a=~][x;!]#a;" 0 ; BUG BUG function call inside while does not work :~|
-; test "10 []x:x;" [10]
-; test-stack "11 [[]]x:x;" [[] 11]
-; test "144 [[]]x:x;" [123]
-; test "144 [[]]x:x;" [123]
-; test-print "155 [[][]]x:x;" [123]
+test-stack "112 [[]]x:x;" ["[]" 112]
+test-stack "113 [[][]]x:x;" ["[][]" 113]
+test-stack "10 []x:x;" ["" 10]
+
+test "123 3a:[0a:]x:[0a;=~][0a:]#a;" 0
+
