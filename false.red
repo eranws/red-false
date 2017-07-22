@@ -6,8 +6,8 @@ s: stack: []
 debug-print: does []
 debug-prin: does []
 
-debug-print: :print
-debug-prin: :prin
+; debug-print: :print
+; debug-prin: :prin
 
 ; print-stack: does [debug-print]
 ; print-read: does []
@@ -50,10 +50,15 @@ variable: [ copy var lower [
             ]]
 
 ; TODO: parse funcion inside function 
-expr: [ "[" expr "]" | any [not ["[" | "]"]] skip ]
 
-lambda: [ "[" copy f expr "]" (push f)] ; push the expression as-is to the stack
-apply: [ "!" (print "apply") (f: pop parse f false-lang)]  ; execute from the head as if it was read from original string
+; lamb-sep: charset "[]"
+not-sep: complement charset "[]"
+
+escaped: [expr | some [not ["[" | "]"]] skip ]
+expr: [ "[" escaped "]" ]
+
+lambda: [ "[" copy f any expr "]" (push f)] ; push the expression as-is to the stack
+apply: [ "!" (debug-print "apply") (f: pop parse f false-lang)]  ; execute from the head as if it was read from original string
 
 stack-functions: [ "$" (push pick s 1)      
                  | "%" (pop)                 
@@ -114,7 +119,10 @@ test: function[f v][
     p: parse f false-lang 
     result: equal? v s/1
     print result
-
+    if (p = false) [
+        print ["FAIL:" f]
+        ; parse-trace f false-lang 
+        ]
     ; prin { f: "} prin f print {"}
     ; prin { v: "} prin v print {"}
     ; prin { s/1: "} prin s/1 print {"}
@@ -226,7 +234,8 @@ test "[[]]x:x;" "[]"
 
 test "[[][]]x:x;" "[][]"
 test "[1]" "1"
-test-trace "[][]" ""
+test "[][]" ""
+test "[[]]" "[]"
 
 ; test-print "123 3a:[0a:]x:[0a=~][x;!]#a;" 0 ; BUG BUG function call inside while does not work :~|
 ; test "10 []x:x;" [10]
