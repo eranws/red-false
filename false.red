@@ -6,8 +6,8 @@ s: stack: []
 debug-print: does []
 debug-prin: does []
 
-; debug-print: :print
-; debug-prin: :prin
+debug-print: :print
+debug-prin: :prin
 
 ; print-stack: does [debug-print]
 ; print-read: does []
@@ -45,12 +45,15 @@ value: ["'" set val skip (push to-integer val)]
 
 lower: charset [#"a" - #"z"]
 variable: [ copy var lower [ 
-            ":" (set load var pop) (debug-prin " set: " debug-print var)| 
+            ":" (set load var pop) (debug-prin " set: " debug-print var) | 
             ";" (push get load var) (debug-prin " get: " debug-print var)
             ]]
 
-lambda: [ "[" copy f to "]" skip (push f)] ; push the expression as-is to the stack
-apply: [ "!" (f: pop parse f false-lang)]  ; execute from the head as if it was read from original string
+; TODO: parse funcion inside function 
+expr: [ "[" expr "]" | any [not ["[" | "]"]] skip ]
+
+lambda: [ "[" copy f expr "]" (push f)] ; push the expression as-is to the stack
+apply: [ "!" (print "apply") (f: pop parse f false-lang)]  ; execute from the head as if it was read from original string
 
 stack-functions: [ "$" (push pick s 1)      
                  | "%" (pop)                 
@@ -62,16 +65,17 @@ if?: [ "?" (f: pop if (pop = tf true) [parse f false-lang])]
 
 while?: ["#" (
         body: pop
-        cond: pop 
-        debug-print body
-        debug-print cond
+        cond: pop
+        debug-prin { body: } debug-print body
+        debug-prin { cond: } debug-print cond
         while [
             (parse cond false-lang) ; run function
             p: pop
-            debug-print p
+            debug-prin { p: } debug-print p
             p = (tf true)] [parse body false-lang])]
 
-false-lang: [any [ copy sym
+false-lang: [any [ 
+                copy sym
                 [space | number | op | bool | value | variable | 
                 lambda | apply | stack-functions | if? | while? ] 
                 (print-read sym)
@@ -145,6 +149,12 @@ test-print: function[f st][
     prin newline
     ]
 
+test-trace: function[f st][
+    clear s 
+    p: parse-trace f false-lang 
+    result: equal? st s
+    print result
+]
 
 ; eq, greater
 test "1 1 =" -1
@@ -208,5 +218,19 @@ test "[0][]#" none
 test "0b:5a:[0a;=~][1a;-a:b;1+b:]#b;" 5
 test "15a:[a;0>][6a;-a:]#a;" -3; f: function[a: a - 6] { while a > 0 do f() }
 
-; --- questions:
-; why false? why forth? what is this stack (runtime? or compiler. can run interpreted?)
+test "0b:5a:[0a;=~][1a;-a:b;1+b:]#b;" 5
+test "111 3a:[0a:]x:x;!a;" 0
+
+test "[[123]]x:x;" "[123]"
+test "[[]]x:x;" "[]"
+
+test "[[][]]x:x;" "[][]"
+test "[1]" "1"
+test-trace "[][]" ""
+
+; test-print "123 3a:[0a:]x:[0a=~][x;!]#a;" 0 ; BUG BUG function call inside while does not work :~|
+; test "10 []x:x;" [10]
+; test-stack "11 [[]]x:x;" [[] 11]
+; test "144 [[]]x:x;" [123]
+; test "144 [[]]x:x;" [123]
+; test-print "155 [[][]]x:x;" [123]
