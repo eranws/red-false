@@ -87,7 +87,6 @@ false-lang: [any [
                 (print-read sym)
                 (print-stack)] ]
 
-; XXX throws error since if? added
 fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
 ; print parse fac false-lang
 
@@ -178,6 +177,8 @@ test "1 2 > ~" -1
 
 test "1 1 =~" 0
 
+; or, and
+
 test "1 1 = 1 0 = |" -1
 
 test "0  0  |" 0
@@ -193,11 +194,16 @@ test "1_ 1_ &" -1
 test "1_ ~" 0
 test "0  ~" -1
 
+; values (ASCII)
 test "'A" 65
 test "' " 32
+
+; variables
 ; test "1a:"      ; { a:=1 }
 ; test "a;1+b:"   ; { b:=a+1 }
 test "1a:a;1+b:b;" 2
+
+; functions
 test "2[1+]!" 3
 
 ; [1+]i:
@@ -205,6 +211,7 @@ test "2[1+]!" 3
 
 test "[1+]i:2i;!" 3
 
+; stack functions
 test-stack "1$" [1 1]
 test-stack "1 2%" [1]
 test-stack "1 2\" [1 2]
@@ -212,6 +219,7 @@ test-stack "1 2 3" [3 2 1]
 test-stack "1 2 3@" [1 3 2]
 test-stack "7 8 9 2ø" [7 9 8 7]
 
+; control-flow if
 test "1_[3]?" 3
 test "0[3]?" none
 test "0~[3]?" 3
@@ -221,6 +229,7 @@ test "1 1=$[]?~[4]?" none
 ; a;1=["hello!"]?		{ if a=1 then print "hello!" }
 ; no strings yet!
 
+; control-flow while
 ; test "[1_][]#" error? ;infinite-loop
 ; [a;1=][2f;!]#		{ while a=1 do f(2) } ; will never stop
 test "[0][]#" none
