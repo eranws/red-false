@@ -49,16 +49,19 @@ variable: [ copy var lower [
             ";" (push get load var) (debug-prin " get: " debug-print var)
             ]]
 
-; TODO: parse funcion inside function 
+; expr: [any [to "[" to "]"] to "]"]
 
-; lamb-sep: charset "[]"
-not-sep: complement charset "[]"
+expr: [(dep: 1) 
+    any [
+        ahead "]" (dep: dep - 1) 
+        if (dep = 0) break 
+        | "[" (dep: dep + 1)
+        | skip
+    ]
+]
 
-escaped: [expr | some [not ["[" | "]"]] skip ]
-expr: [ "[" escaped "]" ]
-
-lambda: [ "[" copy f any expr "]" (push f)] ; push the expression as-is to the stack
-apply: [ "!" (debug-print "apply") (f: pop parse f false-lang)]  ; execute from the head as if it was read from original string
+lambda: [ "[" copy fun expr "]" (push fun)] ; push the expression as-is to the stack
+apply: [ "!" (debug-print "apply") (fun: pop parse fun false-lang)]  ; execute from the head as if it was read from original string
 
 stack-functions: [ "$" (push pick s 1)      
                  | "%" (pop)                 
@@ -66,7 +69,7 @@ stack-functions: [ "$" (push pick s 1)
                  | "@" (swap s next s swap s next next s)
                  | "ø" (push pick s 1 + pop) ]
 
-if?: [ "?" (f: pop if (pop = tf true) [parse f false-lang])]
+if?: [ "?" (fun: pop if (pop = tf true) [parse fun false-lang])]
 
 while?: ["#" (
         body: pop
@@ -114,52 +117,52 @@ print s/1 = 2
 
 ; test: function[f /local s][print parse f false-lang print s]
 
-test: function[f v][
+test: function[ex v][
     clear s 
-    p: parse f false-lang 
+    p: parse ex false-lang 
     result: equal? v s/1
     print result
     if (p = false) [
-        print ["FAIL:" f]
+        print ["FAIL:" ex]
         ; parse-trace f false-lang 
         ]
-    ; prin { f: "} prin f print {"}
+    ; prin { ex: "} prin ex print {"}
     ; prin { v: "} prin v print {"}
     ; prin { s/1: "} prin s/1 print {"}
     ; prin { equal? "} prin result print {"}
     ; prin newline
     ]
 
-test-stack: function[f st][
+test-stack: function[ex st][
     clear s 
-    p: parse f false-lang 
+    p: parse ex false-lang 
     result: equal? st s
     print result
 
-    ; prin { f: "} prin f print {"}
+    ; prin { ex: "} prin ex print {"}
     ; prin { st: "} prin st print {"}
     ; prin { s: "} prin s print {"}
     ; prin { equal? "} prin result print {"}
     ; prin newline
     ]
 
-test-print: function[f st][
+test-print: function[ex st][
     clear s 
-    p: parse f false-lang 
+    p: parse ex false-lang 
     result: equal? st s/1
     print result
 
     prin { parse: "} prin p print {"}
-    prin { f: "} prin f print {"}
+    prin { ex: "} prin ex print {"}
     prin { st: "} prin st print {"}
     prin { s: "} prin s print {"}
     prin { equal? "} prin result print {"}
     prin newline
     ]
 
-test-trace: function[f st][
+test-trace: function[ex st][
     clear s 
-    p: parse-trace f false-lang 
+    p: parse-trace ex false-lang 
     result: equal? st s
     print result
 ]
