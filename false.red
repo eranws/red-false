@@ -80,10 +80,20 @@ while?: ["#" (
             debug-prin { p: } debug-print p
             p = (tf true)] [parse body false-lang])]
 
+
+
+in-buffer: ""
+out-buffer: ""
+string: [ {"} copy str to {"} skip (append out-buffer str)] ; todo: esacpe "
+std-out: [ "." (append out-buffer pop) | "," (append out-buffer to-char pop)]
+std-in: ["^^" (caret: take in-buffer push either (caret = none)[-1][caret])] 
+flush: ["ß" (clear out-buffer clear in-buffer)]
+
 false-lang: [any [ 
                 copy sym
                 [space | number | op | bool | value | variable | 
-                lambda | apply | stack-functions | if? | while? ] 
+                lambda | apply | stack-functions | if? | while? |
+                string | std-out | std-in | flush ] 
                 (print-read sym)
                 (print-stack)] ]
 
@@ -254,3 +264,37 @@ test-stack "10 []x:x;" ["" 10]
 
 test "123 3a:[0a:]x:[0a;=~][0a:]#a;" 0
 
+test {ß} none
+print in-buffer = ""
+print out-buffer = ""
+
+test "123.%" none ;	{ prints string "123" on console }
+print out-buffer = "123"
+
+test {ß} none
+test "65,%" none  ;	{ prints "A" }
+print out-buffer = "A"
+
+test {ß} none
+test {"bye"1} 1 ; prints hi
+print out-buffer = "bye"
+
+; tests string escape
+; test-out {"g^"r"} {g"r}
+; test {"hel%lo"ß1} 1 
+
+in-buffer: "QWEQWE"
+out-buffer: ""
+test {"bla"^^.^^.} none
+print equal? in-buffer "EQWE"
+print equal? out-buffer "blaQW"
+
+test {ß} none
+
+in-buffer: "QWERTY"
+test {[^^$1_=~][,]#} -1 ; reads in and writes to out
+out-buffer = "QWERTY"
+
+in-buffer: "QWERTY"
+test {ß[^^$1_=~][.]#} -1 ; reads in and writes to out
+out-buffer = "QWERTY"
