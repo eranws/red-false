@@ -2,39 +2,22 @@
 Red []
 
 s: stack: []
-
-debug-print: does []
-debug-prin: does []
-
-; debug-print: :print
-; debug-prin: :prin
-
-; print-stack: does [debug-print]
-; print-read: does []
-print-stack: does [debug-prin " stack: " debug-print s]
-print-read: function[a][debug-prin " read: " debug-print a]
-
 pop: does [h: take s]
 push: function[a][insert s a]
 
 digit: charset "0123456789"
 number: [copy n [some digit] (push load n)]
 
-; +: :add ; creates hell on console
-; *: :multiply
-
-; symbol: [copy op ["+" | "*"] (print get-word op insert s add take s take s)]
-; "+" "-" "*" "/" "_"
+; basic operations
 op: [ "+" (push add pop pop)
     | "-" (push subtract pop pop) 
     | "*" (push multiply pop pop) 
     | "/" (push divide pop pop) 
     | "_" (push negate pop) ]
 
-; "="	">"
+; helper, convert truthvalue to 0, -1
 tf: function[v][either ((v = true) or (v = -1)) [-1][0]]
 
-; bool: [ "=" (t: equal? pop pop push (tf t))
 bool: [ "=" (push tf equal? pop pop)
       | ">" (push tf (lesser? pop pop))
       | "~" (push tf (complement pop))
@@ -45,21 +28,19 @@ value: ["'" set val skip (push to-integer val)]
 
 lower: charset [#"a" - #"z"]
 variable: [ copy var lower [ 
-            ":" (set load var pop) (debug-prin " set: " debug-print var) | 
-            ";" (push get load var) (debug-prin " get: " debug-print var)
+            ":" (set load var pop) |
+            ";" (push get load var)
             ]]
 
-expr: [(dep: 1) 
-    any [
-        ahead "]" (dep: dep - 1) 
-        if (dep = 0) break 
-        | "[" (dep: dep + 1)
-        | skip
-    ]
-]
+expr: [(dep: 1) any [
+    ahead "]" (dep: dep - 1) if (dep = 0) break 
+    | "[" (dep: dep + 1)
+    | skip ]]
 
 lambda: [ "[" copy fun expr "]" (push fun)] ; push the expression as-is to the stack
-apply: [ "!" (debug-print "apply") (fun: pop parse fun false-lang)]  ; execute from the head as if it was read from original string
+
+; execute from the head as if it was read from original string
+apply: [ "!" (fun: pop parse fun false-lang)] 
 
 stack-functions: [ "$" (push pick s 1)      
                  | "%" (pop)                 
@@ -69,18 +50,10 @@ stack-functions: [ "$" (push pick s 1)
 
 if?: [ "?" (fun: pop if (pop = tf true) [parse fun false-lang])]
 
-while?: ["#" (
-        body: pop
-        cond: pop
-        debug-prin { body: } debug-print body
-        debug-prin { cond: } debug-print cond
+while?: ["#" (body: pop cond: pop 
         while [
             (parse cond false-lang) ; run function
-            p: pop
-            debug-prin { p: } debug-print p
-            p = (tf true)] [parse body false-lang])]
-
-
+        pop = (tf true) ][parse body false-lang])]
 
 in-buffer: ""
 out-buffer: ""
@@ -90,16 +63,11 @@ std-in: ["^^" (caret: take in-buffer push either (caret = none)[-1][caret])]
 flush: ["ß" (clear out-buffer clear in-buffer)]
 
 false-lang: [any [ 
-                copy sym
-                [space | number | op | bool | value | variable | 
-                lambda | apply | stack-functions | if? | while? |
-                string | std-out | std-in | flush ] 
-                (print-read sym)
-                (print-stack)] ]
+    space | number | op | bool | value | variable | 
+    lambda | apply | stack-functions | if? | while? |
+    string | std-out | std-in | flush ]]
 
-fac: {[$1=$[\%1\]?~[$1-f;!*]?]f:}
-; print parse fac false-lang
-
+; --- tests
 ex1: "1 2 + 4 *"
 print parse ex1 false-lang
 ; print s/1
@@ -240,6 +208,7 @@ test "1 1=$[]?~[4]?" none
 ; no strings yet!
 
 ; control-flow while
+
 ; test "[1_][]#" error? ;infinite-loop
 ; [a;1=][2f;!]#		{ while a=1 do f(2) } ; will never stop
 test "[0][]#" none
@@ -295,6 +264,3 @@ in-buffer: "QWERTY"
 test {[^^$1_=~][,]#} -1 ; reads in and writes to out
 out-buffer = "QWERTY"
 
-in-buffer: "QWERTY"
-test {ß[^^$1_=~][.]#} -1 ; reads in and writes to out
-out-buffer = "QWERTY"
