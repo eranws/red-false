@@ -24,7 +24,7 @@ bool: [ "=" (push tf equal? pop pop)
       | "&" (push tf (and~ pop pop)) 
       | "|" (push tf (or~ pop pop)) ]
 
-value: ["'" set val skip (push to-integer val)]
+value: [ "'" set val skip (push to-integer val)]
 
 lower: charset [#"a" - #"z"]
 variable: [ copy var lower [ 
@@ -52,7 +52,7 @@ if?: [ "?" (fun: pop if (pop = tf true) [parse fun false-lang])]
 
 while?: ["#" (body: pop cond: pop 
         while [
-            (parse cond false-lang) ; run function
+        (parse cond false-lang) ; run function
         pop = (tf true) ][parse body false-lang])]
 
 in-buffer: ""
@@ -62,7 +62,7 @@ std-out: [ "." (append out-buffer pop) | "," (append out-buffer to-char pop)]
 std-in: ["^^" (caret: take in-buffer push either (caret = none)[-1][caret])] 
 flush: ["ß" (clear out-buffer clear in-buffer)]
 
-false-lang: [any [ 
+false-lang: [ any [ 
     space | number | op | bool | value | variable | 
     lambda | apply | stack-functions | if? | while? |
     string | std-out | std-in | flush ]]
@@ -106,7 +106,7 @@ test: function[ex v][
     ; prin { s/1: "} prin s/1 print {"}
     ; prin { equal? "} prin result print {"}
     ; prin newline
-    ]
+]
 
 test-stack: function[ex st][
     clear s 
@@ -119,7 +119,7 @@ test-stack: function[ex st][
     ; prin { s: "} prin s print {"}
     ; prin { equal? "} prin result print {"}
     ; prin newline
-    ]
+]
 
 test-print: function[ex st][
     clear s 
@@ -133,7 +133,7 @@ test-print: function[ex st][
     prin { s: "} prin s print {"}
     prin { equal? "} prin result print {"}
     prin newline
-    ]
+]
 
 test-trace: function[ex st][
     clear s 
@@ -264,3 +264,5 @@ in-buffer: "QWERTY"
 test {[^^$1_=~][,]#} -1 ; reads in and writes to out
 out-buffer = "QWERTY"
 
+fac: {[$1=$[\%1\]?~[$1\-f;!*]?]f:6f;!}
+test fac 720
