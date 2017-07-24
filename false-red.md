@@ -73,3 +73,10 @@ standard input output is modelled with red strings
 ; eval function
 ; false-eval: function[expr][parse expr false-lang]
 ; false-eval {ß"hi"}
+
+Write a compiler under 50 lines of code.
+of course, using a high level language makes this task easier (Red parse engine is a topic for itself)
+
+extending the concept of calculator, with powerful constructs, as while or labmda
+
+IO can be an appendix (just read the stack)
