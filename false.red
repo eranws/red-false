@@ -67,6 +67,16 @@ false-lang: [ any [
     lambda | apply | stack-functions | if? | while? |
     string | std-out | std-in | flush ]]
 
+
+falsify: function[expr][parse expr false-lang]
+
+; f: {[$1=$[\%1\]?~[$1\-f;!*]?]f:6f;!}
+falsify {[$1=$[\%1\]?~[$1\-f;!*]?]f:} ; load factorial
+falsify {6}     ; insert 6 to stack
+falsify {f;!}   ; apply factorial to 6
+falsify {.}     ; read result
+print out-buffer
+
 ; --- tests
 ex1: "1 2 + 4 *"
 print parse ex1 false-lang
