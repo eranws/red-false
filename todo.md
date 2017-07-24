@@ -1,4 +1,7 @@
-; cool idea: make i and o symbols to access io buffers within false ?!
+* wire i-o: read args into in-buffer, print out-buffer to console
+
+
+* cool idea: make i and o symbols to access io buffers within false ?!
 
 IO can be an appendix (just read the stack)
 
