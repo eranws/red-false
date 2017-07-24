@@ -2,7 +2,7 @@
 Red []
 
 s: stack: []
-pop: does [h: take s]
+pop: does [take s]
 push: function[a][insert s a]
 
 digit: charset "0123456789"
